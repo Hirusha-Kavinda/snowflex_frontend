@@ -12,9 +12,9 @@ export class SearchComponent {
   constructor(private router : Router){}
 
 
-  doSearch(value: string){
+  doSearch(value: string) {
     console.log(`value=${value}`);
-    this.router.navigateByUrl(`/search/${value}`)
+    this.router.navigate(['/products'], { queryParams: { keyword: value } });
   }
 
 

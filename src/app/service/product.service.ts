@@ -66,6 +66,23 @@ searchProduct(theKeyword: string):Observable<Product[]>{
 
 
 
+
+
+searchProductPaginate(thePage: number, 
+  thePageSize: number, 
+  theKeyword: string): Observable <GetResponseProduct>{
+
+    const searchUrl =`${this.baseUrl}/search/findByNameContaining?name=${theKeyword}`;
++ `&page=${thePage}&size=${thePageSize}`;
+return  this.httpClient.get<GetResponseProduct>(searchUrl);
+}
+
+
+
+
+
+
+
   private getProduts(searchUrl: string): Observable<Product[]> {
     return this.httpClient.get<GetResponseProduct>(searchUrl).pipe(
       map(response => response._embedded.products)
