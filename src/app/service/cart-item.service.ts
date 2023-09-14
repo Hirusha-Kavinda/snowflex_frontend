@@ -34,6 +34,35 @@ addToCart(theCartItem: CartItem){
   this.computeCartTotals();
 
 }
+
+
+decrementQuntity(theCartItem: CartItem){
+
+  theCartItem.quntitry --;
+
+  if (theCartItem.quntitry === 0){
+    this.remove(theCartItem)
+  }
+  else{
+    this.computeCartTotals();
+  }
+
+}
+
+
+remove(theCartItem: CartItem){
+  // get index of item in the array
+  const itemIndex = this.cartItems.findIndex(tempCartItem => tempCartItem.id === theCartItem.id)
+
+  // if found , remove the item from the array at the given index
+  if(itemIndex > -1){
+    theCartItem.cartItems.splice(itemIndex, 1);
+
+    this,this.computeCartTotals();
+
+  }
+}
+
   computeCartTotals() {
     let totalPriceValue: number = 0;
     let totalQuntityValue: number = 0;

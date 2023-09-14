@@ -14,8 +14,8 @@ export class ProductListComponent implements OnInit{
 
 
   products : Product[] =[];
-  currentCategoryId: number = 1 ;
-  previousCategoryId: number = 1;
+  currentCategoryId: number ;
+  previousCategoryId: number ;
   searchMode: boolean = false;
 
 
