@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
 import { SnowShopFormService } from 'src/app/service/snow-shop-form.service';
+import { Snowvalidators } from 'src/app/validators/snowvalidators';
 
 @Component({
   selector: 'app-checkout',
@@ -30,20 +31,28 @@ export class CheckoutComponent {
 
   ngOnInit() : void {
 
-    this.checkoutFormGroup = this.formBuilder.group({
-    customer : this.formBuilder.group({
-      firstname: [''],
-      lastname: [''],
-      email: ['']
-    }),
+  this.checkoutFormGroup = this.formBuilder.group({
+      customer: this.formBuilder.group({
+        firstname: ['', 
+        [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]
+      ],
+
+        lastname: ['',
+         [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace
+        ]],
+
+        email: ['',
+         [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@gmail\\.com$'), Snowvalidators.notOnlyWhitespace
+        ]]
+      }),
 
     shippingAddress: this.formBuilder.group({
     
-      street: [''],
-      city: [''],
-      state: [''],
-      country:[''],
-      zipcode:['']
+      street: ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
+      city:   ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
+      state:  ['' , [Validators.required]],
+      country:['', [Validators.required]],
+      zipcode:['',[Validators.required, Validators.minLength(3), Snowvalidators.notOnlyWhitespace]]
     
     
     }),
@@ -107,21 +116,47 @@ export class CheckoutComponent {
 
 }
 
+get firstName(){ 
+  return this.checkoutFormGroup.get('customer.firstname');}
+get lastName(){ 
+  return this.checkoutFormGroup.get('customer.lastname');}
+get email(){ 
+  return this.checkoutFormGroup.get('customer.email');}
+
+  get shippingAddressStreet (){ return this.checkoutFormGroup.get('shippingAddress.street');}
+  get shippingAddressCity (){ return this.checkoutFormGroup.get('shippingAddress.city');}
+  get shippingAddressState (){ return this.checkoutFormGroup.get('shippingAddress.state');}
+  get shippingAddressZipCode (){ return this.checkoutFormGroup.get('shippingAddress.zipCode');}
+  get shippingAddressCountry (){ return this.checkoutFormGroup.get('shippingAddress.country');}
+
+
+
+
+
   onSubmit(){
     console.log("Handling the submit button");
-    console.log(this.checkoutFormGroup.get('customer')?.value)
-    console.log("The email address is " + this.checkoutFormGroup.get('customer')?.value.email)
-    console.log("The shipping address country is " + this.checkoutFormGroup.get('shippingAddress')?.value.country.name);
+    if(this.checkoutFormGroup.invalid){ 
+      this.checkoutFormGroup.markAllAsTouched();
 
-  }
+    }
+    
+     
+      console.log(this.checkoutFormGroup.get('customer')?.value);
+      console.log("The email address is " + this.checkoutFormGroup.get('customer.email')?.value);
+  
+      console.log("The shipping address country is " + this.checkoutFormGroup.get('shippingAddress')?.value.country.name);
+      console.log("The shipping address state is " + this.checkoutFormGroup.get('shippingAddress')?.value.state.name);
+}
  
   copyshppingAdressToBillingAddress(event){
     if(event.target.checked){
       this.checkoutFormGroup.controls['billingAddress']
            .setValue(this.checkoutFormGroup.controls['shippingAddress'].value)
+           this.billingAddressStates = this.shippingAddressStates;
     }
     else{
       this.checkoutFormGroup.controls['billingAddress'].reset();
+      this.billingAddressStates = [];
     }
 
   }
