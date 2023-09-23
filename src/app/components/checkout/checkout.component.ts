@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
+import { CartItemService } from 'src/app/service/cart-item.service';
 import { SnowShopFormService } from 'src/app/service/snow-shop-form.service';
 import { Snowvalidators } from 'src/app/validators/snowvalidators';
 
@@ -27,54 +28,50 @@ export class CheckoutComponent {
   billingAddressStates: State[] = [];
 
   constructor(private formBuilder : FormBuilder,
-              private snowShopFormService : SnowShopFormService){}
+              private snowShopFormService : SnowShopFormService,
+              private cartService : CartItemService){}
 
   ngOnInit() : void {
 
+    this.reviewCartDetails()
+
   this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
-        firstname: ['', 
-        [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]
-      ],
 
-        lastname: ['',
-         [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace
-        ]],
-
-        email: ['',
-         [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@gmail\\.com$'), Snowvalidators.notOnlyWhitespace
-        ]]
+        firstname: new FormControl ('', [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+        lastname: new FormControl  ('', [Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+        email: new FormControl    ('',[Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@gmail\\.com$'), Snowvalidators.notOnlyWhitespace])
       }),
 
     shippingAddress: this.formBuilder.group({
     
-      street: ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
-      city:   ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
-      state:  ['',[Validators.required]],
-      country:['',[Validators.required]],
-      zipcode:['',[Validators.required, Validators.minLength(3), Snowvalidators.notOnlyWhitespace]]
+      street: new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+      city:   new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+      state:  new FormControl ('',[Validators.required]),
+      country:new FormControl ('',[Validators.required]),
+      zipcode:new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace])
     
     
     }),
 
     billingAddress: this.formBuilder.group({
     
-      street: ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
-      city:   ['',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]],
-      state:  ['',[Validators.required]],
-      country:['',[Validators.required]],
-      zipcode:['',[Validators.required, Validators.minLength(3), Snowvalidators.notOnlyWhitespace]]
+      street: new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+      city:   new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+      state:  new FormControl ('',[Validators.required]),
+      country:new FormControl ('',[Validators.required]),
+      zipcode:new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace])
     
     }),
 
     creditCard: this.formBuilder.group({
     
-      cardType: [''],
-      nameOnCard: [''],
-      CardNumber: [''],
-      SecurityCode:[''],
-      expirationMonth:[''],
-      expirationYear:['']
+      cardType:        new FormControl ('',[Validators.required]),
+      nameOnCard:      new FormControl ('',[Validators.required, Validators.minLength(2), Snowvalidators.notOnlyWhitespace]),
+      CardNumber:      new FormControl ('',[Validators.required, Validators.pattern('[0-9]{16}'), Snowvalidators.notOnlyWhitespace]),
+      SecurityCode:    new FormControl ('',[Validators.required, Validators.pattern('[0-9]{3}'), Snowvalidators.notOnlyWhitespace]),
+      expirationMonth: new FormControl ('',[Validators.required]),
+      expirationYear:  new FormControl ('',[Validators.required]),
     
     
     })
@@ -114,25 +111,37 @@ export class CheckoutComponent {
   )
 
 }
+  reviewCartDetails() {
+    // subcride to cartservice.totalQuantity
+    this.cartService.totalQuantity.subscribe(
+      totalQuantity => this.totalQuantity = totalQuantity
+    );
+    this.cartService.totalPrice.subscribe(
+      totalPrice => this.totalPrice = totalPrice
+    );
+  }
 
-get firstName(){ 
-  return this.checkoutFormGroup.get('customer.firstname');}
-get lastName(){ 
-  return this.checkoutFormGroup.get('customer.lastname');}
-get email(){ 
-  return this.checkoutFormGroup.get('customer.email');}
+  get firstName(){ return this.checkoutFormGroup.get('customer.firstname');}
+  get lastName(){ return this.checkoutFormGroup.get('customer.lastname');}
+  get email(){ return this.checkoutFormGroup.get('customer.email');}
 
   get shippingAddressStreet (){ return this.checkoutFormGroup.get('shippingAddress.street');}
   get shippingAddressCity (){ return this.checkoutFormGroup.get('shippingAddress.city');}
   get shippingAddressState (){ return this.checkoutFormGroup.get('shippingAddress.state');}
-  get shippingAddressZipCode (){ return this.checkoutFormGroup.get('shippingAddress.zipCode');}
+  get shippingAddressZipCode (){ return this.checkoutFormGroup.get('shippingAddress.zipcode');}
   get shippingAddressCountry (){ return this.checkoutFormGroup.get('shippingAddress.country');}
 
   get billingAddressStreet (){ return this.checkoutFormGroup.get('billingAddress.street');}
   get billingAddressCity (){ return this.checkoutFormGroup.get('billingAddress.city');}
   get billingAddressState (){ return this.checkoutFormGroup.get('billingAddress.state');}
-  get billingAddressZipCode (){ return this.checkoutFormGroup.get('billingAddress.zipCode');}
+  get billingAddressZipCode (){ return this.checkoutFormGroup.get('billingAddress.zipcode');}
   get billingAddressCountry (){ return this.checkoutFormGroup.get('billingAddress.country');}
+
+  get creditCardType (){ return this.checkoutFormGroup.get('creditCard.cardType');}
+  get creditCardName (){ return this.checkoutFormGroup.get('creditCard.nameOnCard');}
+  get creditCardNo(){ return this.checkoutFormGroup.get('creditCard.CardNumber');}
+  get creditCardSecurityCode (){ return this.checkoutFormGroup.get('creditCard.SecurityCode');}
+ 
 
 
 
