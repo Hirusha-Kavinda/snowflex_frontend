@@ -5,6 +5,11 @@ import { State } from 'src/app/common/state';
 import { CartItemService } from 'src/app/service/cart-item.service';
 import { SnowShopFormService } from 'src/app/service/snow-shop-form.service';
 import { Snowvalidators } from 'src/app/validators/snowvalidators';
+import { CheckoutService } from 'src/app/service/checkout.service';
+import { Router } from '@angular/router';
+import { Order } from 'src/app/common/order';
+import { OrderItem } from 'src/app/common/order-item';
+import { Purchase } from 'src/app/common/purchase';
 
 @Component({
   selector: 'app-checkout',
@@ -29,7 +34,9 @@ export class CheckoutComponent {
 
   constructor(private formBuilder : FormBuilder,
               private snowShopFormService : SnowShopFormService,
-              private cartService : CartItemService){}
+              private cartService : CartItemService,
+              private checkoutService : CheckoutService,
+              private router : Router){}
 
   ngOnInit() : void {
 
@@ -150,15 +157,57 @@ export class CheckoutComponent {
     console.log("Handling the submit button");
     if(this.checkoutFormGroup.invalid){ 
       this.checkoutFormGroup.markAllAsTouched();
+      return;
 
     }
+
+    // set up order
+    let order = new Order();
+    order.totalPrice = this.totalPrice;
+    order.totalQuantity = this.totalQuantity
+
+    // get cart items 
+    const cartItems = this.cartService.cartItems
+
+    // create orderItems from cartItem
+    // - long way
+    /*
+    let orderItems : OrderItem[] = [];
+    for (let i=0; i< cartItems.length; i++){
+      orderItems[i] = new OrderItem(cartItems[i]);
+    }*/
+
+    //- short way of doing the same thingy
+    let orderItemsShort: OrderItem[] = cartItems.map(tempCartItem => new OrderItem(tempCartItem));
+
+    // set up purchase
+    let purchase = new Purchase();
+
+    //populate purchase - customer
+    purchase.customer = this.checkoutFormGroup.controls['customer'].value;
+
+    //populate purchase - shipping address
+    purchase.shippingAddress = this.checkoutFormGroup.controls['shippingAddress'].value;
+    const shippingState : State = JSON.parse(JSON.stringify(purchase.shippingAddress.state));
+    const shippingCountry : Country = JSON.parse(JSON.stringify(purchase.shippingAddress.country));
+    purchase.shippingAddress.state = shippingState.name;
+    purchase.shippingAddress.country = shippingCountry.name;
+
+    //populate purchase - billing address
+    purchase.billingAddress = this.checkoutFormGroup.controls['billingAddress'].value;
+    const billingState : State = JSON.parse(JSON.stringify(purchase.billingAddress.state));
+    const billingCountry : Country = JSON.parse(JSON.stringify(purchase.billingAddress.country));
+    purchase.billingAddress.state = billingState.name;
+    purchase.billingAddress.country = billingCountry.name;
+
+    
     
      
-      console.log(this.checkoutFormGroup.get('customer')?.value);
-      console.log("The email address is " + this.checkoutFormGroup.get('customer.email')?.value);
+     //  console.log(this.checkoutFormGroup.get('customer')?.value);
+     // console.log("The email address is " + this.checkoutFormGroup.get('customer.email')?.value);
   
-      console.log("The shipping address country is " + this.checkoutFormGroup.get('shippingAddress')?.value.country.name);
-      console.log("The shipping address state is " + this.checkoutFormGroup.get('shippingAddress')?.value.state.name);
+     // console.log("The shipping address country is " + this.checkoutFormGroup.get('shippingAddress')?.value.country.name);
+     // console.log("The shipping address state is " + this.checkoutFormGroup.get('shippingAddress')?.value.state.name);
 }
  
   copyshppingAdressToBillingAddress(event){
