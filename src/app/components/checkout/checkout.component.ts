@@ -154,13 +154,16 @@ export class CheckoutComponent {
 
 
   onSubmit(){
-    console.log("Handling the submit button");
+    
+   
     if(this.checkoutFormGroup.invalid){ 
       this.checkoutFormGroup.markAllAsTouched();
       return;
-
     }
-
+    console.log("Handling the submit button");
+   
+  console.log(" running ");
+  
     // set up order
     let order = new Order();
     order.totalPrice = this.totalPrice;
@@ -178,7 +181,7 @@ export class CheckoutComponent {
     }*/
 
     //- short way of doing the same thingy
-    let orderItemsShort: OrderItem[] = cartItems.map(tempCartItem => new OrderItem(tempCartItem));
+    let orderItems: OrderItem[] = cartItems.map(tempCartItem => new OrderItem(tempCartItem));
 
     // set up purchase
     let purchase = new Purchase();
@@ -201,6 +204,25 @@ export class CheckoutComponent {
     purchase.billingAddress.country = billingCountry.name;
 
     
+    // populate purchase - order and orderItem
+    purchase.order = order;
+    purchase.orderItems = orderItems;
+
+    // call REST API via the CheckoutService
+    this.checkoutService.placeOrder(purchase).subscribe(
+      {
+        next : response => {
+          alert(`Your order has been received. \n Order traking number: ${response.orderTrackingNumber}`)
+        
+          // reset Cart
+          this.resetCart();
+        
+        },
+        error : err => {
+          alert(`There was a error : ${err.message}`);
+        }
+      }
+    );
     
      
      //  console.log(this.checkoutFormGroup.get('customer')?.value);
@@ -209,6 +231,18 @@ export class CheckoutComponent {
      // console.log("The shipping address country is " + this.checkoutFormGroup.get('shippingAddress')?.value.country.name);
      // console.log("The shipping address state is " + this.checkoutFormGroup.get('shippingAddress')?.value.state.name);
 }
+  resetCart() {
+    // reset cart data 
+    this.cartService.cartItems = [];
+    this.cartService.totalPrice.next(0);
+    this.cartService.totalQuantity.next(0);
+
+    // reset the form
+    this.checkoutFormGroup.reset();
+
+    // navigate back to the products page
+    this.router.navigateByUrl("/products")
+  }
  
   copyshppingAdressToBillingAddress(event){
     if(event.target.checked){
