@@ -16,11 +16,34 @@ export class LoginComponent implements OnInit {
 
   constructor(@Inject(OKTA_AUTH) private oktaAuth: OktaAuth){
 
-    this.oktaSignin = new OktaSignIn();
+    this.oktaSignin = new OktaSignIn({
+      logo: 'assets/images/logo.png',
+      baseUrl:myAppConfig.oidc.issure.split('/oauth2')[0],
+      clientId : myAppConfig.oidc.clientId,
+      redirectUrl : myAppConfig.oidc.redirectUrl,
+      authParams:{
+        pkce : true,          // proof key for codeexchange
+        issuer : myAppConfig.oidc.issure,
+        scopes : myAppConfig.oidc.scopes
+      }
+    });
   }
 
   ngOnInit(): void {
-      
+      this.oktaSignin.remove();
+
+      this.oktaSignin.renderEl({
+        el: '#okta-sign-in-widget'},
+        (response : any) =>{
+          if(response.status === 'SUCCESS'){
+            this.oktaAuth.signInWithRedirect();
+          }
+        },
+        (error: any)=>{
+          throw error;
+        }
+        );
+        
   }
 
 }
